@@ -100,19 +100,6 @@ void utf8_substring(char str[], int32_t cpi_start, int32_t cpi_end, char result[
     result[j] = '\0'; // Null-terminate the result string
 }
 
-int32_t convert_to_decimal(char k){
-    if(width_from_start_byte(k)==1){
-        return k&0b11111111;
-    }else if(width_from_start_byte(k)==2){
-        return k&0b00011111;
-    }else if(width_from_start_byte(k)==3){
-        return k&0b00001111;
-    }else if(width_from_start_byte(k)==4){
-        return k&0b00000111;
-    }
-    return  k&0b00111111;
-}
-
 int32_t codepoint_at(char str[], int32_t cpi){
 
     int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
@@ -124,9 +111,9 @@ int32_t codepoint_at(char str[], int32_t cpi){
     if (width == -1) {
         return -1;
     }
-    int32_t codepoint = convert_to_decimal(str[byte_index]);
+    int32_t codepoint = str[byte_index];
     for (int32_t i = 1; i < width; i++) {
-        codepoint = (codepoint << 6) | convert_to_decimal(str[byte_index + i]);
+        codepoint = (codepoint << 6) | (str[byte_index + i]);
     }
     return codepoint;
 }
