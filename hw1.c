@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 int32_t is_ascii(char str[]) {
     for (int32_t i = 0; str[i] != '\0'; i+=1) {
         if (str[i] < 0 || str[i] > 127) {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
 int32_t capitalize_ascii(char str[]) {
@@ -129,57 +130,43 @@ char is_animal_emoji_at(char str[], int32_t cpi){
 }
 
 int main(){
-    printf("Is 🔥 ASCII? %d\n", is_ascii("🔥"));
-    //    === Output ===
-    //    Is 🔥 ASCII? 0
-
-    printf("Is abcd ASCII? %d\n", is_ascii("abcd"));
-    //    === Output ===
-    //    Is abcd ASCII? 1
-
-    int32_t ret = 0;
-    char str[] = "abcd";
-    ret = capitalize_ascii(str);
-
-    printf("Capitalized String: %s\nCharacters updated: %d\n", str, ret);
-    // === Output ===
-    // Capitalized String: ABCD
-    // Characters updated: 4
-
-    char s[] = { 'H', 0xC3, 0xA9, 'y', 0 }; // same as { 'H', 0xC3, 0xA9, 'y', 0 },   é is start byte + 1 cont. byte
-    printf("Width: %d bytes\n", width_from_start_byte(s[1])); // start byte 0xC3 indicates 2-byte sequence
-
-    // === Output ===
-    // Width: 2 bytes
-
-    printf("Width: %d bytes\n", width_from_start_byte(s[2])); // start byte 0xA9 is a continuation byte, not a start byte
-
-    // === Output ===
-    // Width: -1
-
-    char str1[] = "🦀🦮🦮🦀🦀🦮🦮";
-    printf("Length of string %s is %d\n", str1, utf8_strlen(str1));  // 6 codepoints, (even though 7 bytes)
-
-    // === Output ===
-    // Length of string Joséph is 6
-
-    int32_t idx = 4;
-    printf("Codepoint index %d is byte index %d\n", idx, codepoint_index_to_byte_index("Joséph", idx));
-
-    // === Output ===
-    // Codepoint index 4 is byte index 5
-
-    char result[17];
-    utf8_substring("🦀🦮🦮🦀🦀🦮🦮", 3, 7, result);
-    printf("String: %s\nSubstring: %s\n", "🦀🦮🦮🦀🦀🦮🦮", result);
-    // === Output ===
-    // String: 🦀🦮🦮🦀🦀🦮🦮
-    // Substring: 🦀🦀🦮🦮
-
-    char str2[] = "Joséph";
-    int32_t idx1 = 4;
-    printf("Codepoint at %d in %s is %d\n", idx1, str2, codepoint_at(str2, idx1)); // 'p' is the 4th codepoint
-
-    // === Output ===
-    // Codepoint at 4 in Joséph is 112
+//   ```  Enter a UTF-8 encoded string: My 🐩’s name is Erdős.
+// Valid ASCII: false
+// Uppercased ASCII: "MY 🐩’S NAME IS ERDőS."
+// Length in bytes: 27
+// Number of code points: 21
+// Bytes per code point: 1 1 1 4 3 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1
+// Substring of the first 6 code points: "My 🐩’s"
+// Code points as decimal numbers: 77 121 32 128041 8217 115 32 110 97 109 101 32 105 115 32 69 114 100 337 115 46
+// Animal emojis: 🐩```
+    char str[100];
+    char result[100];
+    printf("Enter a UTF-8 encoded string: ");
+    fgets(str, 100, stdin);
+    str[strcspn(str, "\n")] = 0;
+    printf("Valid ASCII: %s\n", is_ascii(str) ? "true" : "false");
+    printf("Uppercased ASCII: \"%s\"\n", str);
+    printf("Length in bytes: %ld\n", strlen(str));
+    printf("Number of code points: %d\n", utf8_strlen(str));
+    printf("Bytes per code point: ");
+    for (int32_t i = 0; str[i] != '\0'; i+=1) {
+        printf("%d ", width_from_start_byte(str[i]));
+    }
+    printf("\n");
+    utf8_substring(str, 0, 6, result);
+    printf("Substring of the first 6 code points: \"%s\"\n", result);
+    printf("Code points as decimal numbers: ");
+    for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
+        printf("%d ", codepoint_at(str, i));
+    }
+    printf("\n");
+    printf("Animal emojis: ");
+    for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
+        if (is_animal_emoji_at(str, i)) {
+            printf("%c", str[codepoint_index_to_byte_index(str, i)]);
+        }
+    }
+    printf("\n");
+    return 0;
+    
 }
