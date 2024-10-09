@@ -3,7 +3,7 @@
 #include <string.h>
 
 int32_t is_ascii(char str[]) {
-    for (int32_t i = 0; str[i] != '\0'; i++) {
+    for (int32_t i = 0; str[i] != '\0'; i+=1) {
         if (str[i] < 0 || str[i] > 127) {
             return 0;
         }
@@ -13,7 +13,7 @@ int32_t is_ascii(char str[]) {
 
 int32_t capitalize_ascii(char str[]) {
     int counter = 0;
-    for (int32_t i = 0; str[i] != '\0'; i++) {
+    for (int32_t i = 0; str[i] != '\0'; i+=1) {
         if (str[i] >= 'a' && str[i] <= 'z') {
             str[i] -= 32;
             counter+=1;
@@ -55,10 +55,10 @@ int32_t utf8_strlen(char str[]) {
     if (strlen(str) == 0) {
         return -1;
     }
-    for (int32_t i = 0; str[i] != '\0'; i++) {
+    for (int32_t i = 0; str[i] != '\0'; i+=1) {
         if ((str[i] & 0b11000000) != 0b10000000) {
             // If the byte is not a continuation byte, it is the start of a new character
-            length++;
+            length+=1;
         }
     }
     return length;
@@ -67,16 +67,16 @@ int32_t utf8_strlen(char str[]) {
 int32_t codepoint_index_to_byte_index(char str[], int32_t cpi) {
     int32_t byte_index = 0;
     int32_t codepoint_count = 0;
-    for (int32_t i = 0; str[i] != '\0'; i++) {
+    for (int32_t i = 0; str[i] != '\0'; i+=1) {
         if ((str[i] & 0b11000000) != 0b10000000) {
             // If the byte is not a continuation byte, it is the start of a new character
             if (codepoint_count == cpi) {
                 // If the code point index matches the desired index, return the byte index
                 return byte_index;
             }
-            codepoint_count++;
+            codepoint_count+=1;
         }
-        byte_index++;
+        byte_index+=1;
     }
     // If the index is out of bounds, return -1
     return -1;
@@ -85,19 +85,21 @@ int32_t codepoint_index_to_byte_index(char str[], int32_t cpi) {
 void utf8_substring(char str[], int32_t cpi_start, int32_t cpi_end, char result[]) {
     int32_t byte_start = codepoint_index_to_byte_index(str, cpi_start);
     int32_t byte_end = codepoint_index_to_byte_index(str, cpi_end);
-    printf("%d",byte_end);
-    printf("%d",byte_start);
-
-    if (byte_start == -1 || byte_end == -1 || byte_start >= byte_end) {
-        result[0] = '\0'; // Invalid indices, return an empty string
+    if(byte_start >= byte_end){
+        result[0] = '\0';
         return;
     }
-
-    int32_t j = 0;
-    for (int32_t i = byte_start; i < byte_end; i++) {
-        result[j++] = str[i];
+    // If the start or end index is out of bounds, return an empty string
+    if (byte_start == -1 || byte_end == -1) {
+        result[0] = '\0';
+        return;
     }
-    result[j] = '\0'; // Null-terminate the result string
+    //change the string to the substring
+    for (int32_t i = byte_start; i < byte_end; i+=1) {
+        result[i - byte_start] = str[i];
+    }
+    result[byte_end - byte_start] = '\0';
+    //printf("String: %s\nSubstring: %s\n", str, result);
 }
 
 int32_t codepoint_at(char str[], int32_t cpi){
@@ -112,8 +114,8 @@ int32_t codepoint_at(char str[], int32_t cpi){
         return -1;
     }
     int32_t codepoint = str[byte_index];
-    for (int32_t i = 1; i < width; i++) {
-        codepoint = (codepoint << 6) | (str[byte_index + i]);
+    for (int32_t i = 1; i < width; i+=1) {
+        codepoint = (codepoint << 6) | (str[byte_index + i] & 0b00111111);
     }
     return codepoint;
 }
@@ -174,7 +176,7 @@ int main(){
     // String: 🦀🦮🦮🦀🦀🦮🦮
     // Substring: 🦀🦀🦮🦮
 
-    char str2[] = "Joséph";
+    char str2[] = "🦀🦮🦮🦀🦀🦮🦮";
     int32_t idx1 = 4;
     printf("Codepoint at %d in %s is %d\n", idx1, str2, codepoint_at(str2, idx1)); // 'p' is the 4th codepoint
 
