@@ -157,7 +157,7 @@ int main(){
     // === Output ===
     // Width: -1
 
-    char str1[] = "Joséph";
+    char str1[] = "🦀🦮🦮🦀🦀🦮🦮";
     printf("Length of string %s is %d\n", str1, utf8_strlen(str1));  // 6 codepoints, (even though 7 bytes)
 
     // === Output ===
@@ -176,7 +176,7 @@ int main(){
     // String: 🦀🦮🦮🦀🦀🦮🦮
     // Substring: 🦀🦀🦮🦮
 
-    char str2[] = "🦀🦮🦮🦀🦀🦮🦮";
+    char str2[] = "Joséph";
     int32_t idx1 = 4;
     printf("Codepoint at %d in %s is %d\n", idx1, str2, codepoint_at(str2, idx1)); // 'p' is the 4th codepoint
 

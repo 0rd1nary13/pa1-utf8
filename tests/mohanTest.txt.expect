@@ -1,0 +1,8 @@
+Valid ASCII: false
+Uppercased ASCII: "JOSé 🐶🐺🦍🐽🐆🐯😻😸😼😿🐃✈"
+Length in bytes: 53
+Number of code points: 17
+Bytes per code point: 1 1 1 2 1 4 4 4 4 4 4 4 4 4 4 4 3
+Substring of the first 6 code points: "José 🐶"
+Code points as decimal numbers: 74 111 115 233 32 128054 128058 129421 128061 128006 128047 128571 128568 128572 128575 128003 9992
+Animal emojis: 🐶🐺🦍🐽🐆🐯😻😸😼😿🐃
