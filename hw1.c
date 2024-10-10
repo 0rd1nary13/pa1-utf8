@@ -171,7 +171,7 @@ int main(){
     printf("Animal emojis: ");
     for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
         if (is_animal_emoji_at(str, i)) {
-            printf("%c", str[codepoint_index_to_byte_index(str, i)]);
+            printf("%c", "🐩");
         }
     }
     printf("\n");
