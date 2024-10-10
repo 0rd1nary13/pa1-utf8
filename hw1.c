@@ -64,52 +64,40 @@ int32_t utf8_strlen(char str[]) {
 }
 
 int32_t codepoint_index_to_byte_index(char str[], int32_t cpi) {
-    int32_t byte_index = 0;
-    int32_t codepoint_count = 0;
-    //return -1 if the string is not valid UTF-8
-    if (strlen(str) == 0) {
-        return -1;
-    }
-    for (int32_t i = 0; str[i] != '\0'; i+=1) {
-        if ((str[i] & 0b11000000) != 0b10000000) {
-            // If the byte is not a continuation byte, it is the start of a new character
-            if (codepoint_count == cpi) {
-                // If the code point index matches the desired index, return the byte index
-                if(byte_index <=0)
-                    return byte_index;
-            }
-            codepoint_count+=1;
+    int32_t c = 0;
+    int32_t i = 0;
+    while (i < cpi){
+        if(utf8_strlen(str)==-1){
+            return -1;
         }
-        byte_index+=1;
+        c += width_from_start_byte(str[c]);
+        i+=1;
     }
-    // If the code point index is out of bounds, return -1
-    return -1;
+    return c;
 }
 
 void utf8_substring(char str[], int32_t cpi_start, int32_t cpi_end, char result[]) {
     int32_t byte_start = codepoint_index_to_byte_index(str, cpi_start);
     int32_t byte_end = codepoint_index_to_byte_index(str, cpi_end);
-    if(byte_start >= byte_end){
+    // printf("byte_start: %d\n", byte_start);
+    // printf("byte_end: %d\n", byte_end);
+    if(byte_start > byte_end){
         result[0] = '\0';
         return;
     }
-    // If the start or end index is out of bounds, return an empty string
+    // // If the start or end index is out of bounds, return an empty string
     if (byte_start == -1 || byte_end == -1) {
         result[0] = '\0';
         return;
     }
     //change the string to the substring
-    for (int32_t i = byte_start; i < byte_end; i+=1) {
-        result[i - byte_start] = str[i];
-    }
+    strncpy(result, &str[byte_start] , byte_end - byte_start);
     result[byte_end - byte_start] = '\0';
-    //printf("String: %s\nSubstring: %s\n", str, result);
 }
 
 int32_t codepoint_at(char str[], int32_t cpi){
-
+    
     int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
-
     if (byte_index == -1) {
         return -1;
     }
@@ -118,6 +106,7 @@ int32_t codepoint_at(char str[], int32_t cpi){
         return -1;
     }
     int32_t codepoint = str[byte_index];
+
     if(width == 1){
         codepoint = codepoint & 0b01111111;
     }else if(width == 2){
@@ -140,7 +129,7 @@ char is_animal_emoji_at(char str[], int32_t cpi){
 }
 
 int main(){
-//   ```  Enter a UTF-8 encoded string: My 🐩’s name is Erdős.
+// Enter a UTF-8 encoded string: My 🐩’s name is Erdős.
 // Valid ASCII: false
 // Uppercased ASCII: "MY 🐩’S NAME IS ERDőS."
 // Length in bytes: 27
@@ -153,10 +142,14 @@ int main(){
     char result[100];
     printf("Enter a UTF-8 encoded string: \n");
     fgets(str, 100, stdin);
+    //result = str;
+    for(int i = 0; i < 100; i++){
+        result[i] = str[i];
+    }
     str[strcspn(str, "\n")] = 0;
     printf("Valid ASCII: %s\n", is_ascii(str) ? "true" : "false");
-    capitalize_ascii(str);
-    printf("Uppercased ASCII: \"%s\"\n", str);
+    capitalize_ascii(result);
+    printf("Uppercased ASCII: \"%s\"\n", result);
     printf("Length in bytes: %ld\n", strlen(str));
     printf("Number of code points: %d\n", utf8_strlen(str));
     printf("Bytes per code point: ");
@@ -166,8 +159,10 @@ int main(){
             }
     }
     printf("\n");
+
     utf8_substring(str, 0, 6, result);
     printf("Substring of the first 6 code points: \"%s\"\n", result);
+
     printf("Code points as decimal numbers: ");
     for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
         printf("%d ", codepoint_index_to_byte_index(str, i));
