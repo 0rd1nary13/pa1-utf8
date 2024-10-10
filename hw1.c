@@ -65,17 +65,16 @@ int32_t utf8_strlen(char str[]) {
 }
 
 int32_t codepoint_index_to_byte_index(char str[], int32_t cpi) {
-    int32_t c = 0;
+    int32_t codepoint_at = 0;
     int32_t i = 0;
     while (i < cpi){
-        if(utf8_strlen(str)==-1){
+        if(utf8_strlen(str) == -1){
             return -1;
         }
-    
-        c += width_from_start_byte(str[c]);
-        i+=1;
+        codepoint_at += width_from_start_byte(str[codepoint_at]);
+        i += 1;
     }
-    return c;
+    return codepoint_at;
 }
 
 void utf8_substring(char str[], int32_t cpi_start, int32_t cpi_end, char result[]) {
@@ -126,9 +125,15 @@ int32_t codepoint_at(char str[], int32_t cpi) {
     return codepoint;
 }
 
-char is_animal_emoji_at(char str[], int32_t cpi){
-    int a = codepoint_at(str,cpi);
-    if(a > 127999 && a < 128064 || a > 129407 && a < 129455){
+char is_animal_emoji_at(char str[], int32_t cpi) {
+    int32_t codepoint = codepoint_at(str, cpi);
+    if (codepoint == -1) {
+        return 0; // Invalid codepoint
+    }
+
+    // Check if the codepoint is within the specified animal emoji ranges
+    if ((codepoint >= 128000 && codepoint <= 128063) || // 🐀 to 🐿️
+        (codepoint >= 129408 && codepoint <= 129454)) { // 🦀 to 🦮
         return 1;
     }
     return 0;
@@ -171,7 +176,12 @@ int main(){
     printf("Animal emojis: ");
     for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
         if (is_animal_emoji_at(str, i)) {
-            printf("%c", '🐩');
+           //print animal emoji codepoint
+            int32_t byte_index = codepoint_index_to_byte_index(str, i);
+            int32_t width = width_from_start_byte((unsigned char)str[byte_index]);
+            for (int32_t j = 0; j < width; j++) {
+                printf("%c", str[byte_index + j]);
+            }
         }
     }
     printf("\n");
