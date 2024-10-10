@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-#include <math.h>
+
 
 int32_t is_ascii(char str[]) {
     for (int32_t i = 0; str[i] != '\0'; i+=1) {
