@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 int32_t is_ascii(char str[]) {
     for (int32_t i = 0; str[i] != '\0'; i+=1) {
@@ -70,6 +71,7 @@ int32_t codepoint_index_to_byte_index(char str[], int32_t cpi) {
         if(utf8_strlen(str)==-1){
             return -1;
         }
+    
         c += width_from_start_byte(str[c]);
         i+=1;
     }
@@ -95,26 +97,30 @@ void utf8_substring(char str[], int32_t cpi_start, int32_t cpi_end, char result[
     result[byte_end - byte_start] = '\0';
 }
 
-int32_t codepoint_at(char str[], int32_t cpi){
-    
+int32_t codepoint_at(char str[], int32_t cpi) {
     int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
     if (byte_index == -1) {
         return -1;
     }
-    int32_t width = width_from_start_byte(str[byte_index]);
+    int32_t width = width_from_start_byte((unsigned char)str[byte_index]);
+    
     if (width == -1) {
         return -1;
     }
-    int32_t codepoint = str[byte_index];
 
+    int32_t codepoint = 0;
+    unsigned char first_byte = str[byte_index];
     if(width == 1){
-        codepoint = codepoint & 0b01111111;
-    }else if(width == 2){
-        codepoint = codepoint & 0b00011111;
-    }else if(width == 3){
-        codepoint = codepoint & 0b00001111;
-    }else if(width == 4){
-        codepoint = codepoint & 0b00000111;
+        codepoint = first_byte;
+    }
+    else if(width == 2){
+        codepoint = ((first_byte & 0x1F) << 6) | (str[byte_index + 1] & 0x3F);
+    }
+    else if(width == 3){
+        codepoint = ((first_byte & 0x0F) << 12) | ((str[byte_index + 1] & 0x3F) << 6) | (str[byte_index + 2] & 0x3F);
+    }
+    else if(width == 4){
+        codepoint = ((first_byte & 0x07) << 18) | ((str[byte_index + 1] & 0x3F) << 12) | ((str[byte_index + 2] & 0x3F) << 6) | (str[byte_index + 3] & 0x3F);
     }
 
     return codepoint;
@@ -129,22 +135,16 @@ char is_animal_emoji_at(char str[], int32_t cpi){
 }
 
 int main(){
-// Enter a UTF-8 encoded string: My 🐩’s name is Erdős.
-// Valid ASCII: false
-// Uppercased ASCII: "MY 🐩’S NAME IS ERDőS."
-// Length in bytes: 27
-// Number of code points: 21
-// Bytes per code point: 1 1 1 4 3 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1
-// Substring of the first 6 code points: "My 🐩’s"
-// Code points as decimal numbers: 77 121 32 128041 8217 115 32 110 97 109 101 32 105 115 32 69 114 100 337 115 46
-// Animal emojis: 🐩```
+
     char str[100];
     char result[100];
+    char newstr[100];
     printf("Enter a UTF-8 encoded string: \n");
     fgets(str, 100, stdin);
     //result = str;
     for(int i = 0; i < 100; i++){
         result[i] = str[i];
+        newstr[i] = str[i];
     }
     str[strcspn(str, "\n")] = 0;
     printf("Valid ASCII: %s\n", is_ascii(str) ? "true" : "false");
@@ -164,8 +164,8 @@ int main(){
     printf("Substring of the first 6 code points: \"%s\"\n", result);
 
     printf("Code points as decimal numbers: ");
-    for (int32_t i = 0; i < utf8_strlen(str); i+=1) {
-        printf("%d ", codepoint_index_to_byte_index(str, i));
+    for (int32_t i = 0; i < utf8_strlen(newstr); i+=1) {
+        printf("%d ", codepoint_at(newstr, i));
     }
     printf("\n");
     printf("Animal emojis: ");
