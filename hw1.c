@@ -140,29 +140,54 @@ char is_animal_emoji_at(char str[], int32_t cpi) {
 }
 void next_utf8_char(char str[], int32_t cpi, char result[]){
     int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
+    if (byte_index == -1) {
+        result[0] = '\0';
+        return;
+    }
     int32_t width = width_from_start_byte((unsigned char)str[byte_index]);
-    if(width == 1){
-        result[0] = str[byte_index];
+    if (width == -1) {
+        result[0] = '\0';
+        return;
+    }
+    int32_t codepoint = codepoint_at(str, cpi);
+    if (codepoint == -1) {
+        result[0] = '\0';
+        return;
+    }
+    codepoint += 1;
+    if (codepoint > 0x10FFFF) {
+        result[0] = '\0';
+        return;
+    }
+    if (codepoint <= 0x7F) {
+        result[0] = codepoint;
         result[1] = '\0';
+        return;
     }
-    else if(width == 2){
-        result[0] = str[byte_index];
-        result[1] = str[byte_index + 1];
+    if (codepoint <= 0x7FF) {
+        result[0] = 0xC0 | (codepoint >> 6);
+        result[1] = 0x80 | (codepoint & 0x3F);
         result[2] = '\0';
+        return;
     }
-    else if(width == 3){
-        result[0] = str[byte_index];
-        result[1] = str[byte_index + 1];
-        result[2] = str[byte_index + 2];
+    if (codepoint <= 0xFFFF) {
+        result[0] = 0xE0 | (codepoint >> 12);
+        result[1] = 0x80 | ((codepoint >> 6) & 0x3F);
+        result[2] = 0x80 | (codepoint & 0x3F);
         result[3] = '\0';
+        return;
     }
-    else if(width == 4){
-        result[0] = str[byte_index];
-        result[1] = str[byte_index + 1];
-        result[2] = str[byte_index + 2];
-        result[3] = str[byte_index + 3];
+    if (codepoint <= 0x10FFFF) {
+        result[0] = 0xF0 | (codepoint >> 18);
+        result[1] = 0x80 | ((codepoint >> 12) & 0x3F);
+        result[2] = 0x80 | ((codepoint >> 6) & 0x3F);
+        result[3] = 0x80 | (codepoint & 0x3F);
         result[4] = '\0';
+        return;
     }
+    result[0] = '\0';
+    return;
+
 }
 
 
