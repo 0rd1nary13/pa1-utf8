@@ -138,14 +138,43 @@ char is_animal_emoji_at(char str[], int32_t cpi) {
     }
     return 0;
 }
+void next_utf8_char(char str[], int32_t cpi, char result[]){
+    int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
+    int32_t width = width_from_start_byte((unsigned char)str[byte_index]);
+    if(width == 1){
+        result[0] = str[byte_index];
+        result[1] = '\0';
+    }
+    else if(width == 2){
+        result[0] = str[byte_index];
+        result[1] = str[byte_index + 1];
+        result[2] = '\0';
+    }
+    else if(width == 3){
+        result[0] = str[byte_index];
+        result[1] = str[byte_index + 1];
+        result[2] = str[byte_index + 2];
+        result[3] = '\0';
+    }
+    else if(width == 4){
+        result[0] = str[byte_index];
+        result[1] = str[byte_index + 1];
+        result[2] = str[byte_index + 2];
+        result[3] = str[byte_index + 3];
+        result[4] = '\0';
+    }
+}
+
 
 int main(){
 
     char str[100];
     char result[100];
     char newstr[100];
+    int8_t new_int[100];
     printf("Enter a UTF-8 encoded string: \n");
     fgets(str, 100, stdin);
+//    fgets(new_int, 100, stdin);
     //result = str;
     for(int i = 0; i < 100; i++){
         result[i] = str[i];
@@ -185,5 +214,8 @@ int main(){
         }
     }
     printf("\n");
+    int32_t idx = 3;
+    next_utf8_char(str, idx, result);
+    printf("Next Character of Codepoint at Index 3: %s\n",result);
     return 0;
     }
