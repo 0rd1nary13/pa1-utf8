@@ -138,6 +138,7 @@ char is_animal_emoji_at(char str[], int32_t cpi) {
     }
     return 0;
 }
+
 void next_utf8_char(char str[], int32_t cpi, char result[]){
     int32_t byte_index = codepoint_index_to_byte_index(str, cpi);
     if (byte_index == -1) {
